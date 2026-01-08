@@ -2,7 +2,7 @@
 #include <xc.h>         // Definition des registres specifiques au uC
 
 
-#define _XTAL_FREQ 32000000
+#define _XTAL_FREQ 8000000
 
 void main(void) {
     /* Code d'initialisation */
