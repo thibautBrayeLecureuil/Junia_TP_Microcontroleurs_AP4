@@ -67,10 +67,10 @@ Vous placerez chaque nouveau projet créé dans MPLABX dans le répertoire `TP_M
 
 Des références et documents d’appui seront disponibles sur la plateforme de cours ou communiqués lors des séances.
 N’hésitez pas à poser vos questions sur le forum du cours ou à votre enseignant.
-
 ---
 
 ## Auteur
 
 Ce dépôt a été préparé par A.Pirog dans le cadre des travaux pratiques de microcontrôleurs.
+
 Toute modification substantielle du contenu doit être approuvée par l’enseignant.
