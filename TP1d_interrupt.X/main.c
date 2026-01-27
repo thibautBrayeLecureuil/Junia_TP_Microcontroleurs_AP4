@@ -13,7 +13,7 @@ void __interrupt() isr(void){
     
     PIR1bits.TMR2IF = 0;
     
-    if( compteur == 125){ // on compte j'usqu'� 125 car l'interuption a lieu tout les 1 ms
+    if( compteur == 125){ // on compte jusqu'� 125 car l'interuption a lieu tout les 1 ms
         compteur = 0;
         if (LATD == 0x08){ // on change de registre quand on arrive au bout des leds
                 LATD = 0x00;
@@ -41,4 +41,5 @@ void main(void) {
         
          */
     }
+
 }
