@@ -43,6 +43,10 @@ void main(void) {
     LCD_Clear();
     LCD_GoTo(0,0);
     LCD_WriteString("#saucisse");
+    LCD_GoTo(1,0);
+    LCD_WriteString("#merguez");
+
+    
     while(1){
     }
 }
