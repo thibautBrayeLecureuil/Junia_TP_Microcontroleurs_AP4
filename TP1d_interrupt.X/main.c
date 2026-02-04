@@ -5,7 +5,7 @@
 #include "interrupt.h"
 
 
-#define _XTAL_FERQ 8000000
+#define _XTAL_FREQ 8000000
 
 unsigned int compteur = 0;
 
