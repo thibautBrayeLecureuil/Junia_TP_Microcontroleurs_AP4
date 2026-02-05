@@ -4,9 +4,6 @@
 
 #define _XTAL_FERQ 8000000
 
-unsigned int compteur = 0;
-
-
 void configure_pot(void){
     TRISAbits.TRISA0 = 1; 
     ANSELAbits.ANSA0 = 1; 

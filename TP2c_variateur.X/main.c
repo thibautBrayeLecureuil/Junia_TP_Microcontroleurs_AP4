@@ -4,8 +4,6 @@
 
 #define _XTAL_FERQ 8000000
 
-unsigned int compteur = 0;
-
 void init_PWM4(void) {
     
     PWM4DCH = 0; // poids fort : 0
