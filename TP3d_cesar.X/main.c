@@ -108,7 +108,6 @@ void updateOffset(void){
 void UART_SendChar(char dt)
 {
     TX1REG = dt;
-    
 }
 
 //Lis les entrées du terminal
@@ -140,25 +139,25 @@ char cesar(char input){
         tmpChar = handleVoid(tmpChar);
         
         if (tmpChar < 48){
+            // on depasse les bornes donc on part du plus haut + 1.
+            // On soustrait la différence entre le plus bas et notre position.
             tmpChar = 123 - 48 + tmpChar;
         }
-        
         tmpChar = handleVoid(tmpChar);
-
+        
     } else{ //chiffrement
         tmpChar = input + offset;
         
         tmpChar = handleVoid(tmpChar);
         
         if (tmpChar > 122){
+            // On depasse les bornes donc on part du plus bas - 1.
+            // On ajoute la différence entre notre position et le plus haut.
             tmpChar = 47 + tmpChar - 122;
             
         }
-        
         tmpChar = handleVoid(tmpChar);
-        
-    }
-    
+    }  
     return tmpChar;
 }
 //Permet de passer les Maj en Min
@@ -182,8 +181,6 @@ void __interrupt() isr(void){
        input = cesar(input);
        UART_SendChar(input);
     }
-    
-   
 }
 
 void main(void) {
