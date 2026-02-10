@@ -1,5 +1,7 @@
 #include <xc.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 #include "configbits.h"
 #include "lcd.h"
 #include "spi.h"
@@ -26,7 +28,7 @@ void configure_button(void){
 }
 
 void config_adc(void){
-    ADCON0bits.CHS = 0b00000; //ansel du potentiometre
+    ADCON0bits.CHS = 0x00; //ansel du potentiometre
     ADCON1bits.ADFM = 0; // Format : justifié à gauche
     ADCON0bits.ADON = 1; // ADC : en marche
 }
@@ -71,8 +73,18 @@ char read_adc(void){
 void updateDisplay(void){
     LCD_Clear();
     LCD_GoTo(0,0);
-    LCD_WriteString("Offset : " + (offset));
+    
+    //transforme l'offset en chaine de caractere et prépare à l'affichage
+    char str[20];
+    char offsetchar[20];
+    strcpy(str,"Offset : ");
+    sprintf(offsetchar,"%d",offset);
+    strcat(str,offsetchar);
+    
+    LCD_WriteString(str);
+    
     LCD_GoTo(1,0);
+    
     if (encryptionStatus){
         LCD_WriteString("Dechiffrement");
     } else {
@@ -80,39 +92,97 @@ void updateDisplay(void){
     }
 }
 
+//verifie la valeur de l'offset
 void updateOffset(void){
     char res = read_adc();
     unsigned int tmp = offset;
-    offset = roundf(res/7);
+    offset = roundf(res/7.3);
     
+    //Met à jour l'affichage si la valuer de l'offset a changée
     if (tmp != offset){
         updateDisplay();
     }
 }
 
+//envoie les données dans le terminal
 void UART_SendChar(char dt)
 {
     TX1REG = dt;
     
 }
 
+//Lis les entrées du terminal
 char UART_ReadChar(void)
 {
     return RC1REG;
 }
- 
-char cesar(char input){
-    
-    //TODO faire chiffrement
-    return input + offset;
+
+//Permet de gérer le saut dans les caractères ASCII
+char handleVoid(char input){
+    if(input > 57 && input < 97){
+        if (encryptionStatus){//dechiffrement
+            return input - 39;
+        }else{//chiffrement
+            return input + 39;
+        } 
+    }
+    return input;  
 }
 
-void __interrupt() isr(void){
+//Boucle cesar pour chiffrer ou déchiffrer 
+char cesar(char input){
+    
+    char tmpChar;
+    
+    if (encryptionStatus){ //dechiffrement
+        tmpChar = input - offset;
+        
+        tmpChar = handleVoid(tmpChar);
+        
+        if (tmpChar < 48){
+            tmpChar = 123 - 48 + tmpChar;
+        }
+        
+        tmpChar = handleVoid(tmpChar);
 
-    char input = UART_ReadChar();
-    input = cesar();
-    UART_SendChar(input);
+    } else{ //chiffrement
+        tmpChar = input + offset;
+        
+        tmpChar = handleVoid(tmpChar);
+        
+        if (tmpChar > 122){
+            tmpChar = 47 + tmpChar - 122;
+            
+        }
+        
+        tmpChar = handleVoid(tmpChar);
+        
+    }
+    
+    return tmpChar;
+}
+//Permet de passer les Maj en Min
+char handleMaj(char input){ 
+    if (input >= 65 && input <=90){
+        return input + 32;
+    }
+    return input;
+}
+
+//Fonction principale qui se déclanche quand on écrit dans Putty
+void __interrupt() isr(void){
+    
     PIR1bits.RCIF = 0;
+    
+    char input = UART_ReadChar();
+    
+    //Le caractère est dans l'alphabet
+    if ( (input >= 48 && input <= 57) || (input >= 97 && input <= 122)|| (input >= 65 && input <= 90)){
+       input = handleMaj(input);
+       input = cesar(input);
+       UART_SendChar(input);
+    }
+    
    
 }
 
@@ -127,14 +197,18 @@ void main(void) {
     SPI_Initialize();
     LCD_Initialize();
     
+    updateDisplay();
+    
     while(1){
         if (!PORTBbits.RB0) {
+            
             if (encryptionStatus){
                 encryptionStatus = 0;
             } else {
                 encryptionStatus = 1;
             }
             updateDisplay();
+            __delay_ms(500);
         } 
         updateOffset();
     }
